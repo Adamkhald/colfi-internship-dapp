@@ -97,9 +97,9 @@ const MyBanks = () => {
 
   const filteredTransactions = transactions.filter(t => t.bankId === banks[selectedBank].id);
 
-  // Fixed: Added type annotation for category parameter
+  // Fixed: Added proper TypeScript types for category parameter and colors object
   const getCategoryColor = (category: string) => {
-    const colors = {
+    const colors: { [key: string]: string } = {
       'Income': 'bg-green-100 text-green-800 border-green-200',
       'Food': 'bg-orange-100 text-orange-800 border-orange-200',
       'Transfer': 'bg-blue-100 text-blue-800 border-blue-200',
