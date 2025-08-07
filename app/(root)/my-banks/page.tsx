@@ -2,8 +2,20 @@
 
 import React from 'react';
 
+// Define the type for better type safety
+type CustomerType = 'Investment Bank' | 'Hedge Fund' | 'Commercial Bank' | 'Asset Management';
+
+interface Customer {
+  id: number;
+  name: string;
+  type: CustomerType;
+  startingDate: string;
+  contractValue: string;
+  image: string;
+}
+
 const MyCustomers = () => {
-  const customers = [
+  const customers: Customer[] = [
     {
       id: 1,
       name: "Goldman Sachs",
@@ -94,7 +106,7 @@ const MyCustomers = () => {
     }
   ];
 
-  const formatDate = (dateString : string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
@@ -103,7 +115,8 @@ const MyCustomers = () => {
     });
   };
 
-  const getTypeColor = (type) => {
+  // Fixed: Added type annotation to the type parameter
+  const getTypeColor = (type: CustomerType) => {
     switch (type) {
       case 'Investment Bank':
         return { backgroundColor: 'rgba(219, 234, 254, 1)', color: '#2563eb', border: '1px solid #93c5fd' };
@@ -118,7 +131,7 @@ const MyCustomers = () => {
     }
   };
 
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
@@ -128,35 +141,35 @@ const MyCustomers = () => {
     minHeight: '100vh'
   };
 
-  const headerStyle = {
+  const headerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.5rem',
     marginBottom: '1rem'
   };
 
-  const titleStyle = {
+  const titleStyle: React.CSSProperties = {
     fontSize: '30px',
     lineHeight: '38px',
     fontWeight: '600',
     color: '#111827'
   };
 
-  const subtitleStyle = {
+  const subtitleStyle: React.CSSProperties = {
     fontSize: '16px',
     lineHeight: '24px',
     fontWeight: '400',
     color: '#4b5563'
   };
 
-  const statsGridStyle = {
+  const statsGridStyle: React.CSSProperties = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '1rem',
     marginBottom: '2rem'
   };
 
-  const statCardStyle = {
+  const statCardStyle: React.CSSProperties = {
     backgroundColor: 'white',
     borderRadius: '8px',
     border: '1px solid #e5e7eb',
@@ -164,24 +177,24 @@ const MyCustomers = () => {
     textAlign: 'center'
   };
 
-  const statValueStyle = {
+  const statValueStyle: React.CSSProperties = {
     fontSize: '24px',
     fontWeight: 'bold',
     marginBottom: '0.25rem'
   };
 
-  const statLabelStyle = {
+  const statLabelStyle: React.CSSProperties = {
     fontSize: '14px',
     color: '#6b7280'
   };
 
-  const gridStyle = {
+  const gridStyle: React.CSSProperties = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: '1.5rem'
   };
 
-  const cardStyle = {
+  const cardStyle: React.CSSProperties = {
     backgroundColor: 'white',
     borderRadius: '12px',
     border: '1px solid rgba(229, 231, 235, 0.5)',
@@ -191,18 +204,18 @@ const MyCustomers = () => {
     cursor: 'pointer'
   };
 
-  const cardContentStyle = {
+  const cardContentStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between'
   };
 
-  const leftContentStyle = {
+  const leftContentStyle: React.CSSProperties = {
     flex: '1',
     paddingRight: '2rem'
   };
 
-  const companyNameStyle = {
+  const companyNameStyle: React.CSSProperties = {
     fontSize: '18px',
     lineHeight: '22px',
     fontWeight: '600',
@@ -211,7 +224,7 @@ const MyCustomers = () => {
     transition: 'color 0.3s ease'
   };
 
-  const badgeStyle = {
+  const badgeStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -222,11 +235,11 @@ const MyCustomers = () => {
     marginBottom: '2rem'
   };
 
-  const sectionStyle = {
+  const sectionStyle: React.CSSProperties = {
     marginBottom: '1.5rem'
   };
 
-  const labelStyle = {
+  const labelStyle: React.CSSProperties = {
     fontSize: '12px',
     fontWeight: '500',
     color: '#6b7280',
@@ -234,13 +247,13 @@ const MyCustomers = () => {
     display: 'block'
   };
 
-  const valueStyle = {
+  const valueStyle: React.CSSProperties = {
     fontSize: '14px',
     fontWeight: '600',
     color: '#374151'
   };
 
-  const contractValueStyle = {
+  const contractValueStyle: React.CSSProperties = {
     fontSize: '16px',
     fontWeight: 'bold',
     background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
@@ -249,11 +262,11 @@ const MyCustomers = () => {
     backgroundClip: 'text'
   };
 
-  const imageContainerStyle = {
+  const imageContainerStyle: React.CSSProperties = {
     flexShrink: '0'
   };
 
-  const imageStyle = {
+  const imageStyle: React.CSSProperties = {
     width: '96px',
     height: '96px',
     borderRadius: '12px',
@@ -264,14 +277,14 @@ const MyCustomers = () => {
     transition: 'box-shadow 0.3s ease'
   };
 
-  const imgStyle = {
+  const imgStyle: React.CSSProperties = {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
     transition: 'transform 0.3s ease'
   };
 
-  const bottomSectionStyle = {
+  const bottomSectionStyle: React.CSSProperties = {
     marginTop: '1.5rem',
     paddingTop: '1rem',
     borderTop: '1px solid #f3f4f6',
@@ -280,26 +293,26 @@ const MyCustomers = () => {
     justifyContent: 'space-between'
   };
 
-  const statusStyle = {
+  const statusStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem'
   };
 
-  const statusDotStyle = {
+  const statusDotStyle: React.CSSProperties = {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
     backgroundColor: '#10b981'
   };
 
-  const statusTextStyle = {
+  const statusTextStyle: React.CSSProperties = {
     fontSize: '12px',
     fontWeight: '500',
     color: '#6b7280'
   };
 
-  const idStyle = {
+  const idStyle: React.CSSProperties = {
     fontSize: '12px',
     fontWeight: '500',
     color: '#9ca3af'
