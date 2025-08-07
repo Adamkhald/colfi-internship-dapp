@@ -9,6 +9,7 @@ const Home = () => {
     userId: 'user-123',
     firstName: 'Adam',
     lastName: 'KHALD',
+    name: 'Adam KHALD',
     email: 'adkhald@gmail.com',
     currentBalance: 25000,
     totalBanks: 2,
