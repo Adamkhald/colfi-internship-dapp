@@ -24,6 +24,47 @@ const Home = () => {
     ssn: ''
   };
 
+  const mockBanks = [
+    {
+      $id: 'bank-1',
+      accountId: 'account-1',
+      bankId: 'bank-001',
+      accessToken: 'mock-access-token-1',
+      fundingSourceUrl: '',
+      userId: 'user-123',
+      sharableId: 'share-1',
+      id: 'bank-1',
+      availableBalance: 12000,
+      currentBalance: 13000,
+      officialName: 'Chase Bank',
+      mask: '1234',
+      institutionId: 'ins_1',
+      name: 'Chase Checking',
+      type: 'depository',
+      subtype: 'checking',
+      appwriteItemId: 'item-1'
+    },
+    {
+      $id: 'bank-2',
+      accountId: 'account-2',
+      bankId: 'bank-002',
+      accessToken: 'mock-access-token-2',
+      fundingSourceUrl: '',
+      userId: 'user-123',
+      sharableId: 'share-2',
+      id: 'bank-2',
+      availableBalance: 8000,
+      currentBalance: 8500,
+      officialName: 'Wells Fargo',
+      mask: '5678',
+      institutionId: 'ins_2',
+      name: 'Wells Fargo Savings',
+      type: 'depository',
+      subtype: 'savings',
+      appwriteItemId: 'item-2'
+    }
+  ];
+
   return (
     <section className='home'>
       <div className='home-content'>
@@ -36,9 +77,9 @@ const Home = () => {
           />
 
           <TotalBalanceBox 
-            accounts={[]}
-            totalBanks={0}
-            totalCurrentBalance={25000}
+            accounts={mockBanks}
+            totalBanks={2}
+            totalCurrentBalance={21500}
           />
         </header>
 
@@ -47,7 +88,7 @@ const Home = () => {
       <RightSidebar 
         user={loggedIn}
         transactions={[]}
-        banks={[{currentBalance: 13000}, {}]} 
+        banks={mockBanks} 
       />
     </section>
   )
