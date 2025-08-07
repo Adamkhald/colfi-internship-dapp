@@ -4,7 +4,7 @@ A decentralized web application for managing financial assets, including collate
 
 ## Overview
 
-ColFi is a Next.js-based decentralized application (DApp) that provides financial institutions with a comprehensive platform to manage their assets, particularly focusing on collateral management and bond tracking. The application streamlines asset management processes through an intuitive web interface.
+This Web App is a Next.js-based decentralized application (DApp) that provides financial institutions with a comprehensive platform to manage their assets, particularly focusing on collateral management and bond tracking. The application streamlines asset management processes through an intuitive web interface.
 
 ## Features
 
