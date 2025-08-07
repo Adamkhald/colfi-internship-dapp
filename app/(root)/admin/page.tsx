@@ -97,7 +97,8 @@ const MyBanks = () => {
 
   const filteredTransactions = transactions.filter(t => t.bankId === banks[selectedBank].id);
 
-  const getCategoryColor = (category) => {
+  // Fixed: Added type annotation for category parameter
+  const getCategoryColor = (category: string) => {
     const colors = {
       'Income': 'bg-green-100 text-green-800 border-green-200',
       'Food': 'bg-orange-100 text-orange-800 border-orange-200',
