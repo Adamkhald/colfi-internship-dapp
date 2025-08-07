@@ -1,4 +1,3 @@
-/* eslint-disable no-prototype-builtins */
 import { type ClassValue, clsx } from "clsx";
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
@@ -76,7 +75,8 @@ export function formatAmount(amount: number): string {
   return formatter.format(amount);
 }
 
-export const parseStringify = (value: any) => JSON.parse(JSON.stringify(value));
+// Fixed: replaced 'any' with 'unknown' for better type safety
+export const parseStringify = (value: unknown) => JSON.parse(JSON.stringify(value));
 
 export const removeSpecialCharacters = (value: string) => {
   return value.replace(/[^\w\s]/gi, "");
@@ -142,8 +142,8 @@ export function countTransactionCategories(
       // Extract the category from the transaction
       const category = transaction.category;
 
-      // If the category exists in the categoryCounts object, increment its count
-      if (categoryCounts.hasOwnProperty(category)) {
+      // Fixed: replaced hasOwnProperty with Object.prototype.hasOwnProperty.call for better type safety
+      if (Object.prototype.hasOwnProperty.call(categoryCounts, category)) {
         categoryCounts[category]++;
       } else {
         // Otherwise, initialize the count to 1
@@ -208,4 +208,4 @@ export const authFormSchema = (type: string) => z.object({
   // both
   email: z.string().email(),
   password: z.string().min(8),
-})
+});
