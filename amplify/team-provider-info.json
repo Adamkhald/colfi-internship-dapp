@@ -1,0 +1,34 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-colfi-dev-7088e-authRole",
+      "UnauthRoleArn": "arn:aws:iam::728033415433:role/amplify-colfi-dev-7088e-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::728033415433:role/amplify-colfi-dev-7088e-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-colfi-dev-7088e-deployment",
+      "UnauthRoleName": "amplify-colfi-dev-7088e-unauthRole",
+      "StackName": "amplify-colfi-dev-7088e",
+      "StackId": "arn:aws:cloudformation:us-east-1:728033415433:stack/amplify-colfi-dev-7088e/ee7f6dd0-782f-11f0-8084-0e9b767e4af5",
+      "AmplifyAppId": "d2udh4mp3u01qc",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-colfi-dev-7088e-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "function": {
+        "collateralBackend": {
+          "deploymentBucketName": "amplify-colfi-dev-7088e-deployment",
+          "s3Key": "amplify-builds/collateralBackend-7130442f56774773556a-build.zip"
+        }
+      },
+      "auth": {
+        "colfi": {}
+      },
+      "api": {
+        "colfi": {},
+        "collateralAPI": {}
+      },
+      "storage": {
+        "collateralDB": {}
+      }
+    }
+  }
+}
