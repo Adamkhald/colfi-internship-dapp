@@ -3,10 +3,14 @@
 import HeaderBox from '@/components/HeaderBox'
 import RightSidebar from '@/components/RightSidebar'
 import TotalBalanceBox from '@/components/TotalBalanceBox'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const Home = () => {
-  const loggedIn = {
+  const router = useRouter()
+  
+  // Default user data as a constant to avoid re-creation
+  const defaultUser = React.useMemo(() => ({
     $id: 'mock-id-123',
     userId: 'user-123',
     firstName: 'Adam',
@@ -24,50 +28,132 @@ const Home = () => {
     postalCode: '',
     dateOfBirth: '',
     ssn: ''
+  }), []);
+
+  const [loggedIn, setLoggedIn] = useState(defaultUser)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem('loggedInUser')
+    
+    if (!storedUser) {
+      // No user logged in, redirect to sign-in
+      router.push('/sign-in')
+      return
+    }
+    
+    try {
+      const userData = JSON.parse(storedUser)
+      setLoggedIn(userData)
+    } catch (error) {
+      console.error('Error parsing stored user data:', error)
+      // Invalid data, redirect to sign-in
+      sessionStorage.removeItem('loggedInUser')
+      router.push('/sign-in')
+      return
+    }
+    
+    setIsLoading(false)
+  }, [defaultUser, router])
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('loggedInUser')
+    router.push('/sign-in')
+  }
+
+  // Generate mock banks based on logged in user
+  const getMockBanks = (user: typeof defaultUser) => {
+    const bankNames = ['Chase Bank', 'Wells Fargo', 'Bank of America', 'Citibank'];
+    const userBankName = user.name.includes('HSBC') ? 'HSBC' : 
+                        user.name.includes('BNP') ? 'BNP Paribas' :
+                        user.name.includes('Société') ? 'Société Générale' :
+                        user.name.includes('Lebanese') ? 'Lebanese Bank' :
+                        bankNames[0];
+    
+    return [
+      {
+        $id: 'bank-1',
+        accountId: 'account-1',
+        bankId: 'bank-001',
+        accessToken: 'mock-access-token-1',
+        fundingSourceUrl: '',
+        userId: user.userId,
+        sharableId: 'share-1',
+        shareableId: 'share-1',
+        id: 'bank-1',
+        availableBalance: Math.floor(user.currentBalance * 0.6),
+        currentBalance: Math.floor(user.currentBalance * 0.65),
+        officialName: userBankName,
+        mask: '1234',
+        institutionId: 'ins_1',
+        name: `${userBankName} Checking`,
+        type: 'depository',
+        subtype: 'checking',
+        appwriteItemId: 'item-1'
+      },
+      {
+        $id: 'bank-2',
+        accountId: 'account-2',
+        bankId: 'bank-002',
+        accessToken: 'mock-access-token-2',
+        fundingSourceUrl: '',
+        userId: user.userId,
+        sharableId: 'share-2',
+        shareableId: 'share-2',
+        id: 'bank-2',
+        availableBalance: Math.floor(user.currentBalance * 0.3),
+        currentBalance: Math.floor(user.currentBalance * 0.35),
+        officialName: 'Secondary Bank',
+        mask: '5678',
+        institutionId: 'ins_2',
+        name: `${userBankName} Savings`,
+        type: 'depository',
+        subtype: 'savings',
+        appwriteItemId: 'item-2'
+      }
+    ];
   };
 
-  const mockBanks = [
-    {
-      $id: 'bank-1',
-      accountId: 'account-1',
-      bankId: 'bank-001',
-      accessToken: 'mock-access-token-1',
-      fundingSourceUrl: '',
-      userId: 'user-123',
-      sharableId: 'share-1',
-      shareableId: 'share-1',
-      id: 'bank-1',
-      availableBalance: 12000,
-      currentBalance: 13000,
-      officialName: 'Chase Bank',
-      mask: '1234',
-      institutionId: 'ins_1',
-      name: 'Chase Checking',
-      type: 'depository',
-      subtype: 'checking',
-      appwriteItemId: 'item-1'
-    },
-    {
-      $id: 'bank-2',
-      accountId: 'account-2',
-      bankId: 'bank-002',
-      accessToken: 'mock-access-token-2',
-      fundingSourceUrl: '',
-      userId: 'user-123',
-      sharableId: 'share-2',
-      shareableId: 'share-2',
-      id: 'bank-2',
-      availableBalance: 8000,
-      currentBalance: 8500,
-      officialName: 'Wells Fargo',
-      mask: '5678',
-      institutionId: 'ins_2',
-      name: 'Wells Fargo Savings',
-      type: 'depository',
-      subtype: 'savings',
-      appwriteItemId: 'item-2'
-    }
-  ];
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f9fafb'
+      }}>
+        <div style={{
+          padding: '2rem',
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f4f6',
+            borderTop: '4px solid #2563eb',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading COLFI...</p>
+        </div>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  const mockBanks = getMockBanks(loggedIn);
 
   return (
     <section className='home'>
@@ -77,15 +163,41 @@ const Home = () => {
             type="greeting"
             title="Welcome"
             user={loggedIn?.firstName || 'Guest'}
-            subtext="Glad to have you here!"
+            subtext={`Logged in as ${loggedIn?.name || 'Guest User'}`}
           />
           
           <TotalBalanceBox 
             accounts={mockBanks}
             totalBanks={2}
-            totalCurrentBalance={21500}
+            totalCurrentBalance={loggedIn?.currentBalance || 25000}
           />
         </header>
+
+        {/* Logout Button */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          marginBottom: '1rem' 
+        }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#dc2626',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.375rem',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+          >
+            Logout
+          </button>
+        </div>
 
         {/* Three horizontal cards grid */}
         <style jsx>{`
@@ -369,6 +481,22 @@ const Home = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* User Info Debug Panel (Optional - Remove in production) */}
+        <div style={{
+          marginTop: '2rem',
+          padding: '1rem',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>
+            Current User Session:
+          </h4>
+          <div style={{ fontSize: '12px', color: '#64748b' }}>
+            Name: {loggedIn.name} | Email: {loggedIn.email} | Balance: ${loggedIn.currentBalance?.toLocaleString()}
           </div>
         </div>
       </div>

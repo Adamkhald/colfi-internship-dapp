@@ -1,12 +1,20 @@
-import AuthForm from '@/components/AuthForm';
-import React from 'react';
+'use client'
+
+import AuthForm from '@/components/AuthForm'
+import React from 'react'
+import { useRouter } from 'next/navigation'
 
 const SignIn = () => {
+  const router = useRouter()
+
+  const handleLoginSuccess = () => {
+    // Redirect to the home page after successful login
+    router.push('/')
+  }
+
   return (
-    <section className='flex-center size-full max-sm:px-6'>
-      <AuthForm />
-    </section>
-  );
+    <AuthForm onLoginSuccess={handleLoginSuccess} />
+  )
 }
 
-export default SignIn;
+export default SignIn

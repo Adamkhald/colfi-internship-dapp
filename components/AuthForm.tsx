@@ -7,20 +7,49 @@ interface Counterparty {
   email: string
   password: string
   name: string
+  firstName: string
+  lastName: string
 }
 
-const AuthForm = () => {
+interface AuthFormProps {
+  onLoginSuccess?: () => void
+}
+
+const AuthForm = ({ onLoginSuccess }: AuthFormProps = {}) => {
   const [selectedCounterparty, setSelectedCounterparty] = useState('')
   const [serverType, setServerType] = useState('Server')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
   const counterparties: Counterparty[] = [
-    { email: 'bnp@colfi.com', password: 'colfi123456', name: 'BNP Paribas' },
-    { email: 'sg@colfi.com', password: 'colfi123456', name: 'Société Générale' },
-    { email: 'lb@colfi.com', password: 'colfi123456', name: 'Lebanese Bank' },
-    { email: 'hsbc@colfi.com', password: 'colfi123456', name: 'HSBC' }
+    { 
+      email: 'bnp@colfi.com', 
+      password: 'colfi123456', 
+      name: 'BNP Paribas',
+      firstName: 'BNP',
+      lastName: 'Paribas'
+    },
+    { 
+      email: 'sg@colfi.com', 
+      password: 'colfi123456', 
+      name: 'Société Générale',
+      firstName: 'Société',
+      lastName: 'Générale'
+    },
+    { 
+      email: 'lb@colfi.com', 
+      password: 'colfi123456', 
+      name: 'Lebanese Bank',
+      firstName: 'Lebanese',
+      lastName: 'Bank'
+    },
+    { 
+      email: 'hsbc@colfi.com', 
+      password: 'colfi123456', 
+      name: 'HSBC',
+      firstName: 'HSBC',
+      lastName: 'Bank'
+    }
   ]
 
   const handleCounterpartySelect = (counterparty: Counterparty) => {
@@ -35,8 +64,42 @@ const AuthForm = () => {
       return;
     }
 
-    // ✅ Inputs are filled, so redirect to admin page
-    window.location.href = '/';
+    // Find the selected counterparty
+    const selectedUser = counterparties.find(cp => cp.email === email)
+    
+    if (selectedUser) {
+      // Store user data in sessionStorage to pass to home page
+      const userData = {
+        $id: `mock-id-${Date.now()}`,
+        userId: `user-${Date.now()}`,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        name: selectedUser.name,
+        email: selectedUser.email,
+        currentBalance: Math.floor(Math.random() * 50000) + 10000, // Random balance
+        totalBanks: 2,
+        dwollaCustomerUrl: '',
+        dwollaCustomerId: '',
+        dwollaCustomerAvatarUrl: '',
+        address1: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        dateOfBirth: '',
+        ssn: ''
+      }
+      
+      // Store in sessionStorage (Note: In a real app, you'd use a proper state management solution)
+      sessionStorage.setItem('loggedInUser', JSON.stringify(userData))
+      
+      // Call the success callback if provided
+      if (onLoginSuccess) {
+        onLoginSuccess()
+      } else {
+        // Fallback for direct routing (if used standalone)
+        window.location.href = '/';
+      }
+    }
   };
 
   return (
@@ -284,15 +347,15 @@ const AuthForm = () => {
           
           <button
             onClick={handleLogin}
-            disabled={isLoading || !email || !password}
+            disabled={!email || !password}
             className="form-btn"
             style={{ 
               padding: '0.75rem 2rem',
-              opacity: (isLoading || !email || !password) ? 0.5 : 1,
-              cursor: (isLoading || !email || !password) ? 'not-allowed' : 'pointer'
+              opacity: (!email || !password) ? 0.5 : 1,
+              cursor: (!email || !password) ? 'not-allowed' : 'pointer'
             }}
           >
-            {isLoading ? 'Authenticating...' : 'Login to COLFI'}
+            Login to COLFI
           </button>
         </div>
       </div>
