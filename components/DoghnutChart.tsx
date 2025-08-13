@@ -13,8 +13,8 @@ const Doghnutchart = ({accounts}:DoughnutChartProps) => {
         datasets : [
             {
                 label: 'Banks',
-                data: [10000,2500,180],
-                backgroundColor: ['#E91E63','#f75423ff', '#be2300ff']
+                data: [2100,1400,1600],
+                backgroundColor: ['#4169E1','#0000CD', '#000080']
             }
         ],
         labels: ['BNP', 'Société Générale', 'Crédit Agricole'],

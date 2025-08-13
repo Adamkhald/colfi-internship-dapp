@@ -239,7 +239,7 @@ const Home = () => {
               height: '200px',
               backgroundColor: '#f3f4f6',
               marginBottom: '1.5rem',
-              backgroundImage: 'url("https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=400&h=200&fit=crop&crop=center")',
+              backgroundImage: 'url("https://images.unsplash.com/photo-1712873068978-eb0cb20d1b62?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}>
@@ -320,7 +320,7 @@ const Home = () => {
               height: '200px',
               backgroundColor: '#f3f4f6',
               marginBottom: '1.5rem',
-              backgroundImage: 'url("https://images.unsplash.com/photo-1570125909517-53cb21c89ff2?w=400&h=200&fit=crop&crop=center")',
+              backgroundImage: 'url("https://plus.unsplash.com/premium_photo-1723519383058-e4abe8a0d109?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}>
@@ -421,7 +421,7 @@ const Home = () => {
               height: '200px',
               backgroundColor: '#f3f4f6',
               marginBottom: '1.5rem',
-              backgroundImage: 'url("https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&h=200&fit=crop&crop=center")',
+              backgroundImage: 'url("https://plus.unsplash.com/premium_photo-1661877295383-cabcefd7db1c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}>
