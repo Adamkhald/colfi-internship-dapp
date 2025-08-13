@@ -29,374 +29,271 @@ const AuthForm = () => {
     setPassword(counterparty.password)
   }
 
-const handleLogin = () => {
-  if (!email || !password) {
-    alert('Please fill in both email and password.');
-    return;
-  }
+  const handleLogin = () => {
+    if (!email || !password) {
+      alert('Please fill in both email and password.');
+      return;
+    }
 
-  // ✅ Inputs are filled, so redirect
-  window.location.href = 'http://localhost:3000/';
-};
+    // ✅ Inputs are filled, so redirect to admin page
+    window.location.href = '/';
+  };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)',
-      padding: '2rem 1rem'
+    <div style={{ 
+      padding: '2rem',
+      backgroundColor: '#f9fafb',
+      minHeight: '100vh'
     }}>
-      {/* Header Section */}
-      <div style={{ 
-        textAlign: 'center', 
-        marginBottom: '3rem',
-        maxWidth: '800px',
-        margin: '0 auto 3rem auto'
-      }}>
-        <h1 style={{ 
-          fontSize: '3rem', 
-          fontWeight: 'bold', 
-          color: '#1f2937', 
-          marginBottom: '1rem',
-          letterSpacing: '-0.025em'
-        }}>
-          Welcome to COLFI
-        </h1>
-        <p style={{
-          fontSize: '1.125rem',
-          color: '#6b7280',
-          marginBottom: '1.5rem'
-        }}>
-          Secure banking authentication for financial institutions
-        </p>
-        <div style={{
-          width: '6rem',
-          height: '0.25rem',
-          background: '#4f46e5',
-          margin: '0 auto',
-          borderRadius: '9999px'
-        }}></div>
-      </div>
-
-      {/* Main Content Grid */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: '2rem',
-        maxWidth: '1400px',
-        margin: '0 auto'
+        maxWidth: '1200px',
+        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem'
       }}>
-        
-        {/* Left Panel - Counterparty Selection */}
+        {/* Header */}
+        <div className="header-box">
+          <h1 className="header-box-title">Welcome to COLFI</h1>
+          <p className="header-box-subtext">
+            Secure banking authentication for financial institutions
+          </p>
+        </div>
+
+        {/* Financial Institution Selection */}
         <div style={{
-          background: 'white',
-          borderRadius: '1rem',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          padding: '2rem'
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb',
+          padding: '2rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '1.5rem'
-          }}>
+          <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1.5rem' }}>
             Select Financial Institution
-          </h2>
+          </h3>
           
           <div style={{ 
-            display: 'grid', 
-            gap: '1rem'
+            display: 'flex', 
+            gap: '1rem',
+            overflowX: 'auto',
+            paddingBottom: '0.5rem'
           }}>
             {counterparties.map((counterparty) => (
-              <button
+              <div
                 key={counterparty.email}
                 onClick={() => handleCounterpartySelect(counterparty)}
                 style={{
-                  padding: '1.5rem',
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  borderRadius: '0.75rem',
-                  border: selectedCounterparty === counterparty.name ? '2px solid #4f46e5' : '2px solid #e5e7eb',
-                  background: selectedCounterparty === counterparty.name ? '#eef2ff' : 'white',
-                  color: selectedCounterparty === counterparty.name ? '#4338ca' : '#4b5563',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '1.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  border: selectedCounterparty === counterparty.name ? '2px solid #2563eb' : '1px solid #e5e7eb',
+                  backgroundColor: selectedCounterparty === counterparty.name ? '#dbeafe' : 'white',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  textAlign: 'left',
-                  position: 'relative'
+                  minWidth: '200px',
+                  textAlign: 'center'
                 }}
                 onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (selectedCounterparty !== counterparty.name) {
-                      target.style.borderColor = '#a5b4fc';
-                      target.style.background = '#f9fafb';
-                      target.style.transform = 'translateY(-2px)';
-                      target.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (selectedCounterparty !== counterparty.name) {
-                      target.style.borderColor = '#e5e7eb';
-                      target.style.background = 'white';
-                      target.style.transform = 'translateY(0)';
-                      target.style.boxShadow = 'none';
-                    }
-                  }}
-
+                  if (selectedCounterparty !== counterparty.name) {
+                    e.currentTarget.style.backgroundColor = '#f9fafb';
+                    e.currentTarget.style.borderColor = '#a5b4fc';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedCounterparty !== counterparty.name) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                    e.currentTarget.style.borderColor = '#e5e7eb';
+                  }
+                }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span>{counterparty.name}</span>
-                  {selectedCounterparty === counterparty.name && (
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      background: '#4f46e5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '12px'
-                    }}>
-                      ✓
-                    </div>
-                  )}
+                {selectedCounterparty === counterparty.name && (
+                  <div style={{
+                    width: '1.5rem',
+                    height: '1.5rem',
+                    borderRadius: '50%',
+                    backgroundColor: '#2563eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '0.75rem'
+                  }}>
+                    ✓
+                  </div>
+                )}
+                <div>
+                  <div className="text-16" style={{ 
+                    fontWeight: '600', 
+                    color: selectedCounterparty === counterparty.name ? '#1d4ed8' : '#111827',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {counterparty.name}
+                  </div>
+                  <div className="text-14" style={{ color: '#6b7280' }}>
+                    {counterparty.email}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: '#6b7280',
-                  marginTop: '0.5rem'
-                }}>
-                  {counterparty.email}
-                </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Right Panel - Login Form */}
+        {/* Authentication Form */}
         <div style={{
-          background: 'white',
-          borderRadius: '1rem',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          padding: '2rem'
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb',
+          padding: '2rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '1.5rem'
-          }}>
-            Authentication
-          </h2>
+          <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1.5rem' }}>
+            Authentication Details
+          </h3>
 
-          {/* Server Type Selection */}
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{ 
-              display: 'block', 
-              fontSize: '0.875rem', 
-              fontWeight: '600', 
-              color: '#374151', 
-              marginBottom: '0.75rem' 
-            }}>
-              Connection Type
-            </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={() => setServerType('Server')}
-                style={{
-                  flex: '1',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s',
-                  background: serverType === 'Server' ? '#4f46e5' : '#f3f4f6',
-                  color: serverType === 'Server' ? 'white' : '#4b5563',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: serverType === 'Server' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
-                }}
-              >
-                Server
-              </button>
-              <button
-                onClick={() => setServerType('Blockchain')}
-                style={{
-                  flex: '1',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s',
-                  background: serverType === 'Blockchain' ? '#4f46e5' : '#f3f4f6',
-                  color: serverType === 'Blockchain' ? 'white' : '#4b5563',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: serverType === 'Blockchain' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
-                }}
-              >
-                Blockchain
-              </button>
-            </div>
-          </div>
-
-          {/* Wise Bank Account */}
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{
-              background: '#fefce8',
-              border: '1px solid #fde047',
-              borderRadius: '0.75rem',
-              padding: '1rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: '0.75rem',
-                  height: '0.75rem',
-                  background: '#22c55e',
-                  borderRadius: '50%',
-                  marginRight: '0.75rem'
-                }}></div>
-                <span style={{ 
-                  fontSize: '1rem', 
-                  fontWeight: '500', 
-                  color: '#374151' 
-                }}>
-                  Wise Bank Account Connected
-                </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Connection Type */}
+            <div className="form-item">
+              <label className="form-label">Connection Type *</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setServerType('Server')}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    border: serverType === 'Server' ? '2px solid #2563eb' : '1px solid #d1d5db',
+                    backgroundColor: serverType === 'Server' ? '#dbeafe' : 'white',
+                    color: serverType === 'Server' ? '#1d4ed8' : '#4b5563',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    fontSize: '14px'
+                  }}
+                >
+                  Server
+                </button>
+                <button
+                  onClick={() => setServerType('Blockchain')}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    border: serverType === 'Blockchain' ? '2px solid #2563eb' : '1px solid #d1d5db',
+                    backgroundColor: serverType === 'Blockchain' ? '#dbeafe' : 'white',
+                    color: serverType === 'Blockchain' ? '#1d4ed8' : '#4b5563',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    fontSize: '14px'
+                  }}
+                >
+                  Blockchain
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Login Form */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div>
-              <label style={{ 
-                display: 'block', 
-                fontSize: '0.875rem', 
-                fontWeight: '600', 
-                color: '#374151', 
-                marginBottom: '0.5rem' 
-              }}>
-                Email Address
-              </label>
+            {/* Bank Connection Status */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '1rem',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '0.5rem'
+            }}>
+              <div style={{
+                width: '0.75rem',
+                height: '0.75rem',
+                backgroundColor: '#22c55e',
+                borderRadius: '50%'
+              }}></div>
+              <span className="text-14" style={{ color: '#15803d', fontWeight: '500' }}>
+                Wise Bank Account Connected
+              </span>
+            </div>
+
+            {/* Form Fields - Full Width */}
+            <div className="form-item">
+              <label className="form-label">Email Address *</label>
               <input
                 type="email"
+                className="input-class"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '0.75rem',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s',
-                  outline: 'none'
-                }}
                 placeholder="Enter your email"
-                onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                style={{ padding: '0.75rem 1rem', width: '100%' }}
               />
             </div>
 
-            <div>
-              <label style={{ 
-                display: 'block', 
-                fontSize: '0.875rem', 
-                fontWeight: '600', 
-                color: '#374151', 
-                marginBottom: '0.5rem' 
-              }}>
-                Password
-              </label>
+            <div className="form-item">
+              <label className="form-label">Password *</label>
               <input
                 type="password"
+                className="input-class"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '0.75rem',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s',
-                  outline: 'none'
-                }}
                 placeholder="Enter your password"
-                onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                style={{ padding: '0.75rem 1rem', width: '100%' }}
               />
             </div>
 
-            {/* Login Button */}
-            <button
-              onClick={handleLogin}
-              disabled={isLoading || !email || !password}
-              style={{
-                width: '100%',
-                padding: '1rem 1.5rem',
-                borderRadius: '0.75rem',
-                fontWeight: '600',
-                fontSize: '1.125rem',
-                border: 'none',
-                cursor: (isLoading || !email || !password) ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s',
-                background: (isLoading || !email || !password) ? '#9ca3af' : '#4f46e5',
-                color: 'white',
-                opacity: (isLoading || !email || !password) ? 0.7 : 1
-              }}
-              onMouseEnter={(e) => {
-                  if (!isLoading && email && password) {
-                    const target = e.target as HTMLElement;
-                    target.style.background = '#4338ca';
-                    target.style.transform = 'translateY(-2px)';
-                    target.style.boxShadow = '0 10px 25px -5px rgba(79, 70, 229, 0.4)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isLoading && email && password) {
-                    const target = e.target as HTMLElement;
-                    target.style.background = '#4f46e5';
-                    target.style.transform = 'translateY(0)';
-                    target.style.boxShadow = 'none';
-                  }
-                }}
-
-            >
-              {isLoading ? 'Authenticating...' : 'Login to COLFI'}
-            </button>
-          </div>
-
-          {/* Selected Credentials Display */}
-          {selectedCounterparty && (
-            <div style={{
-              marginTop: '2rem',
-              padding: '1.5rem',
-              background: '#f9fafb',
-              borderRadius: '0.75rem',
-              border: '1px solid #e5e7eb'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <div style={{
-                  width: '0.5rem',
-                  height: '0.5rem',
-                  background: '#22c55e',
-                  borderRadius: '50%',
-                  marginRight: '0.5rem'
-                }}></div>
-                <p style={{ 
-                  fontSize: '0.875rem', 
-                  color: '#4b5563',
-                  fontWeight: '500'
-                }}>
-                  Connected to {selectedCounterparty}
-                </p>
-              </div>
-              <p style={{ 
-                fontSize: '0.75rem', 
-                color: '#6b7280' 
+            {/* Selected Institution Display */}
+            {selectedCounterparty && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '0.5rem'
               }}>
-                Using credentials: {email}
-              </p>
-            </div>
-          )}
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <div style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '50%',
+                    marginRight: '0.5rem'
+                  }}></div>
+                  <span className="text-14" style={{ color: '#4b5563', fontWeight: '500' }}>
+                    Connected to {selectedCounterparty}
+                  </span>
+                </div>
+                <span className="text-12" style={{ color: '#6b7280' }}>
+                  Using credentials: {email}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb',
+          padding: '1.5rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }}>
+          <div className="text-14" style={{ color: '#6b7280' }}>
+            Select an institution and enter credentials
+          </div>
+          
+          <button
+            onClick={handleLogin}
+            disabled={isLoading || !email || !password}
+            className="form-btn"
+            style={{ 
+              padding: '0.75rem 2rem',
+              opacity: (isLoading || !email || !password) ? 0.5 : 1,
+              cursor: (isLoading || !email || !password) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {isLoading ? 'Authenticating...' : 'Login to COLFI'}
+          </button>
         </div>
       </div>
     </div>
