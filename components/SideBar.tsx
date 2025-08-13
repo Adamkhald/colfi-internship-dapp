@@ -6,8 +6,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+// Define a proper type for user instead of using 'any'
+interface User {
+  id?: string
+  name?: string
+  email?: string
+  // Add other user properties as needed
+}
+
 interface SiderbarProps {
-  user: any
+  user: User
 }
 
 const Sidebar = ({ user }: SiderbarProps) => {
