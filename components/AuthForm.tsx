@@ -273,7 +273,7 @@ const AuthForm = ({ onLoginSuccess }: AuthFormProps = {}) => {
                 borderRadius: '50%'
               }}></div>
               <span className="text-14" style={{ color: '#15803d', fontWeight: '500' }}>
-                Wise Bank Account Connected
+                chosen institution: {selectedCounterparty || 'None'}
               </span>
             </div>
 
