@@ -586,6 +586,9 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
   // Success/Error result display
   if (submitResult) {
     return (
+      <Head>
+        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </Head>
       <div style={{ 
         padding: '2rem',
         backgroundColor: '#f9fafb',
