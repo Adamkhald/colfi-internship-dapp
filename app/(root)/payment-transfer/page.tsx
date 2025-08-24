@@ -2,9 +2,53 @@
 
 import React, { useState } from 'react'
 
+interface FormData {
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientAddress: string;
+  clientId: string;
+  accountType: string;
+  jurisdiction: string;
+  complianceAgreement: boolean;
+  riskDisclosure: boolean;
+  regulatoryCompliance: boolean;
+  legalRepresentation: string;
+  securityLevel: string;
+  encryptionType: string;
+  warrantyPeriod: string;
+  insuranceCoverage: string;
+  dataProtection: boolean;
+  specialTerms: string;
+  customClauses: string;
+  penalties: string;
+  disputeResolution: string;
+  amendments: string;
+  executionDate: string;
+  executionTime: string;
+  authorizedPersonnel: string;
+  verificationMethod: string;
+  completionCriteria: string;
+}
+
+interface SubmitResult {
+  success: boolean;
+  operationId?: string;
+  blockHash?: string;
+  message: string;
+  gasUsed?: string;
+  confirmations?: string;
+}
+
 const Operation = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
+  
+  // Replace with your EC2 public IP
+const API_BASE_URL = 'http://16.171.199.116:3001';
+  
+  const [formData, setFormData] = useState<FormData>({
     // Step 1: Client Info
     clientName: '',
     clientEmail: '',
@@ -43,23 +87,47 @@ const Operation = () => {
   });
 
   const steps = [
-    { id: 1, name: 'Client Information', description: 'Basic client details and account setup' },
-    { id: 2, name: 'Obligations and Law', description: 'Legal compliance and regulatory requirements' },
-    { id: 3, name: 'Security and Warranties', description: 'Security measures and warranty terms' },
-    { id: 4, name: 'Additional Provisions', description: 'Custom terms and special conditions' },
-    { id: 5, name: 'Execution Details', description: 'Implementation and completion specifications' }
+    { id: 1, name: 'Client Information' },
+    { id: 2, name: 'Legal Compliance' },
+    { id: 3, name: 'Security & Warranties' },
+    { id: 4, name: 'Additional Provisions' },
+    { id: 5, name: 'Execution Details' }
   ];
 
-  const handleInputChange = (field: string, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        return !!(formData.clientName && formData.clientEmail && formData.clientPhone && 
+               formData.clientAddress && formData.clientId && formData.accountType);
+      case 2:
+        return !!(formData.jurisdiction && formData.complianceAgreement && formData.riskDisclosure && 
+               formData.regulatoryCompliance && formData.legalRepresentation);
+      case 3:
+        return !!(formData.securityLevel && formData.encryptionType && formData.warrantyPeriod && 
+               formData.insuranceCoverage && formData.dataProtection);
+      case 4:
+        return !!(formData.specialTerms && formData.customClauses && formData.penalties && 
+               formData.disputeResolution && formData.amendments);
+      case 5:
+        return !!(formData.executionDate && formData.executionTime && formData.authorizedPersonnel && 
+               formData.verificationMethod && formData.completionCriteria);
+      default:
+        return true;
+    }
+  };
+
   const handleNext = () => {
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep)) {
+      if (currentStep < 5) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -69,89 +137,158 @@ const Operation = () => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
-    alert('Operation form submitted successfully!');
+  const submitToBlockchain = async (formData: FormData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/submit-operation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Blockchain submission error:', error);
+      throw new Error(`Failed to submit to blockchain: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(5)) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitResult(null);
+
+    try {
+      const blockchainResult = await submitToBlockchain(formData);
+      
+      setSubmitResult({
+        success: true,
+        operationId: blockchainResult.operationId,
+        blockHash: blockchainResult.blockHash,
+        message: 'Smart contract created successfully!',
+        gasUsed: blockchainResult.gasUsed,
+        confirmations: blockchainResult.confirmations
+      });
+
+      setTimeout(() => {
+        setFormData({
+          clientName: '', clientEmail: '', clientPhone: '', clientAddress: '',
+          clientId: '', accountType: '', jurisdiction: '', complianceAgreement: false,
+          riskDisclosure: false, regulatoryCompliance: false, legalRepresentation: '',
+          securityLevel: '', encryptionType: '', warrantyPeriod: '', insuranceCoverage: '',
+          dataProtection: false, specialTerms: '', customClauses: '', penalties: '',
+          disputeResolution: '', amendments: '', executionDate: '', executionTime: '',
+          authorizedPersonnel: '', verificationMethod: '', completionCriteria: ''
+        });
+        setCurrentStep(1);
+        setSubmitResult(null);
+      }, 10000);
+
+    } catch (error) {
+      setSubmitResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
+    const baseInputStyle: React.CSSProperties = {
+      padding: '0.75rem 1rem',
+      width: '100%',
+      border: '1px solid #d1d5db',
+      borderRadius: '0.5rem',
+      fontSize: '1rem',
+      transition: 'border-color 0.2s',
+      outline: 'none'
+    };
+
+    const labelStyle: React.CSSProperties = {
+      display: 'block',
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      color: '#374151',
+      marginBottom: '0.5rem'
+    };
+
     switch (currentStep) {
       case 1:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>
-              Step 1: Client Information
-            </h3>
-            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              <div className="form-item">
-                <label className="form-label">Full Name *</label>
+              <div>
+                <label style={labelStyle}>Full Name *</label>
                 <input
                   type="text"
-                  className="input-class"
                   value={formData.clientName}
-                  onChange={(e) => handleInputChange('clientName', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('clientName', e.target.value)}
                   placeholder="Enter client full name"
-                  style={{ padding: '0.75rem 1rem' }}
+                  style={baseInputStyle}
                 />
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Email Address *</label>
+              <div>
+                <label style={labelStyle}>Email Address *</label>
                 <input
                   type="email"
-                  className="input-class"
                   value={formData.clientEmail}
-                  onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('clientEmail', e.target.value)}
                   placeholder="client@example.com"
-                  style={{ padding: '0.75rem 1rem' }}
+                  style={baseInputStyle}
                 />
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Phone Number *</label>
+              <div>
+                <label style={labelStyle}>Phone Number *</label>
                 <input
                   type="tel"
-                  className="input-class"
                   value={formData.clientPhone}
-                  onChange={(e) => handleInputChange('clientPhone', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('clientPhone', e.target.value)}
                   placeholder="+1 (555) 123-4567"
-                  style={{ padding: '0.75rem 1rem' }}
+                  style={baseInputStyle}
                 />
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Client ID</label>
+              <div>
+                <label style={labelStyle}>Client ID *</label>
                 <input
                   type="text"
-                  className="input-class"
                   value={formData.clientId}
-                  onChange={(e) => handleInputChange('clientId', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('clientId', e.target.value)}
                   placeholder="Unique client identifier"
-                  style={{ padding: '0.75rem 1rem' }}
+                  style={baseInputStyle}
                 />
               </div>
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Address</label>
+            <div>
+              <label style={labelStyle}>Address *</label>
               <textarea
-                className="input-class"
                 value={formData.clientAddress}
-                onChange={(e) => handleInputChange('clientAddress', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('clientAddress', e.target.value)}
                 placeholder="Complete address"
                 rows={3}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Account Type *</label>
+            <div>
+              <label style={labelStyle}>Account Type *</label>
               <select
-                className="input-class"
                 value={formData.accountType}
-                onChange={(e) => handleInputChange('accountType', e.target.value)}
-                style={{ padding: '0.75rem 1rem' }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('accountType', e.target.value)}
+                style={baseInputStyle}
               >
                 <option value="">Select account type</option>
                 <option value="individual">Individual</option>
@@ -166,17 +303,12 @@ const Operation = () => {
       case 2:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>
-              Step 2: Obligations and Law
-            </h3>
-            
-            <div className="form-item">
-              <label className="form-label">Jurisdiction *</label>
+            <div>
+              <label style={labelStyle}>Jurisdiction *</label>
               <select
-                className="input-class"
                 value={formData.jurisdiction}
-                onChange={(e) => handleInputChange('jurisdiction', e.target.value)}
-                style={{ padding: '0.75rem 1rem' }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('jurisdiction', e.target.value)}
+                style={baseInputStyle}
               >
                 <option value="">Select jurisdiction</option>
                 <option value="us">United States</option>
@@ -187,31 +319,30 @@ const Operation = () => {
               </select>
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Legal Representation</label>
+            <div>
+              <label style={labelStyle}>Legal Representation *</label>
               <input
                 type="text"
-                className="input-class"
                 value={formData.legalRepresentation}
-                onChange={(e) => handleInputChange('legalRepresentation', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('legalRepresentation', e.target.value)}
                 placeholder="Law firm or legal representative"
-                style={{ padding: '0.75rem 1rem' }}
+                style={baseInputStyle}
               />
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <h4 className="text-16" style={{ fontWeight: '600', color: '#374151' }}>Required Agreements</h4>
+              <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#374151' }}>Required Agreements</h4>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <input
                   type="checkbox"
                   id="compliance"
                   checked={formData.complianceAgreement}
-                  onChange={(e) => handleInputChange('complianceAgreement', e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('complianceAgreement', e.target.checked)}
                   style={{ width: '1.25rem', height: '1.25rem' }}
                 />
-                <label htmlFor="compliance" className="text-14" style={{ color: '#374151' }}>
-                  I agree to comply with all applicable regulations and laws
+                <label htmlFor="compliance" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                  I agree to comply with all applicable regulations and laws *
                 </label>
               </div>
               
@@ -220,11 +351,11 @@ const Operation = () => {
                   type="checkbox"
                   id="risk"
                   checked={formData.riskDisclosure}
-                  onChange={(e) => handleInputChange('riskDisclosure', e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('riskDisclosure', e.target.checked)}
                   style={{ width: '1.25rem', height: '1.25rem' }}
                 />
-                <label htmlFor="risk" className="text-14" style={{ color: '#374151' }}>
-                  I acknowledge and accept the risk disclosure statement
+                <label htmlFor="risk" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                  I acknowledge and accept the risk disclosure statement *
                 </label>
               </div>
               
@@ -233,11 +364,11 @@ const Operation = () => {
                   type="checkbox"
                   id="regulatory"
                   checked={formData.regulatoryCompliance}
-                  onChange={(e) => handleInputChange('regulatoryCompliance', e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('regulatoryCompliance', e.target.checked)}
                   style={{ width: '1.25rem', height: '1.25rem' }}
                 />
-                <label htmlFor="regulatory" className="text-14" style={{ color: '#374151' }}>
-                  I confirm regulatory compliance requirements understanding
+                <label htmlFor="regulatory" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                  I confirm regulatory compliance requirements understanding *
                 </label>
               </div>
             </div>
@@ -247,18 +378,13 @@ const Operation = () => {
       case 3:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>
-              Step 3: Security and Warranties
-            </h3>
-            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              <div className="form-item">
-                <label className="form-label">Security Level *</label>
+              <div>
+                <label style={labelStyle}>Security Level *</label>
                 <select
-                  className="input-class"
                   value={formData.securityLevel}
-                  onChange={(e) => handleInputChange('securityLevel', e.target.value)}
-                  style={{ padding: '0.75rem 1rem' }}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('securityLevel', e.target.value)}
+                  style={baseInputStyle}
                 >
                   <option value="">Select security level</option>
                   <option value="standard">Standard</option>
@@ -268,13 +394,12 @@ const Operation = () => {
                 </select>
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Encryption Type</label>
+              <div>
+                <label style={labelStyle}>Encryption Type *</label>
                 <select
-                  className="input-class"
                   value={formData.encryptionType}
-                  onChange={(e) => handleInputChange('encryptionType', e.target.value)}
-                  style={{ padding: '0.75rem 1rem' }}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('encryptionType', e.target.value)}
+                  style={baseInputStyle}
                 >
                   <option value="">Select encryption</option>
                   <option value="aes256">AES-256</option>
@@ -283,13 +408,12 @@ const Operation = () => {
                 </select>
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Warranty Period</label>
+              <div>
+                <label style={labelStyle}>Warranty Period *</label>
                 <select
-                  className="input-class"
                   value={formData.warrantyPeriod}
-                  onChange={(e) => handleInputChange('warrantyPeriod', e.target.value)}
-                  style={{ padding: '0.75rem 1rem' }}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('warrantyPeriod', e.target.value)}
+                  style={baseInputStyle}
                 >
                   <option value="">Select warranty period</option>
                   <option value="1year">1 Year</option>
@@ -299,15 +423,14 @@ const Operation = () => {
                 </select>
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Insurance Coverage</label>
+              <div>
+                <label style={labelStyle}>Insurance Coverage *</label>
                 <input
                   type="text"
-                  className="input-class"
                   value={formData.insuranceCoverage}
-                  onChange={(e) => handleInputChange('insuranceCoverage', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('insuranceCoverage', e.target.value)}
                   placeholder="Coverage amount (e.g., $1,000,000)"
-                  style={{ padding: '0.75rem 1rem' }}
+                  style={baseInputStyle}
                 />
               </div>
             </div>
@@ -317,11 +440,11 @@ const Operation = () => {
                 type="checkbox"
                 id="dataProtection"
                 checked={formData.dataProtection}
-                onChange={(e) => handleInputChange('dataProtection', e.target.checked)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('dataProtection', e.target.checked)}
                 style={{ width: '1.25rem', height: '1.25rem' }}
               />
-              <label htmlFor="dataProtection" className="text-14" style={{ color: '#374151' }}>
-                I agree to data protection and privacy policy terms
+              <label htmlFor="dataProtection" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                I agree to data protection and privacy policy terms *
               </label>
             </div>
           </div>
@@ -330,53 +453,45 @@ const Operation = () => {
       case 4:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>
-              Step 4: Additional Provisions
-            </h3>
-            
-            <div className="form-item">
-              <label className="form-label">Special Terms</label>
+            <div>
+              <label style={labelStyle}>Special Terms *</label>
               <textarea
-                className="input-class"
                 value={formData.specialTerms}
-                onChange={(e) => handleInputChange('specialTerms', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('specialTerms', e.target.value)}
                 placeholder="Enter any special terms or conditions"
                 rows={4}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Custom Clauses</label>
+            <div>
+              <label style={labelStyle}>Custom Clauses *</label>
               <textarea
-                className="input-class"
                 value={formData.customClauses}
-                onChange={(e) => handleInputChange('customClauses', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customClauses', e.target.value)}
                 placeholder="Additional custom clauses"
                 rows={4}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Penalties and Sanctions</label>
+            <div>
+              <label style={labelStyle}>Penalties and Sanctions *</label>
               <textarea
-                className="input-class"
                 value={formData.penalties}
-                onChange={(e) => handleInputChange('penalties', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('penalties', e.target.value)}
                 placeholder="Penalty terms for non-compliance"
                 rows={3}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Dispute Resolution</label>
+            <div>
+              <label style={labelStyle}>Dispute Resolution *</label>
               <select
-                className="input-class"
                 value={formData.disputeResolution}
-                onChange={(e) => handleInputChange('disputeResolution', e.target.value)}
-                style={{ padding: '0.75rem 1rem' }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('disputeResolution', e.target.value)}
+                style={baseInputStyle}
               >
                 <option value="">Select dispute resolution method</option>
                 <option value="arbitration">Arbitration</option>
@@ -386,15 +501,14 @@ const Operation = () => {
               </select>
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Amendment Procedures</label>
+            <div>
+              <label style={labelStyle}>Amendment Procedures *</label>
               <textarea
-                className="input-class"
                 value={formData.amendments}
-                onChange={(e) => handleInputChange('amendments', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('amendments', e.target.value)}
                 placeholder="Procedures for contract amendments"
                 rows={3}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
           </div>
@@ -403,53 +517,45 @@ const Operation = () => {
       case 5:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 className="text-20" style={{ fontWeight: '600', color: '#111827', marginBottom: '1rem' }}>
-              Step 5: Execution Details
-            </h3>
-            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              <div className="form-item">
-                <label className="form-label">Execution Date *</label>
+              <div>
+                <label style={labelStyle}>Execution Date *</label>
                 <input
                   type="date"
-                  className="input-class"
                   value={formData.executionDate}
-                  onChange={(e) => handleInputChange('executionDate', e.target.value)}
-                  style={{ padding: '0.75rem 1rem' }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('executionDate', e.target.value)}
+                  style={baseInputStyle}
                 />
               </div>
               
-              <div className="form-item">
-                <label className="form-label">Execution Time</label>
+              <div>
+                <label style={labelStyle}>Execution Time *</label>
                 <input
                   type="time"
-                  className="input-class"
                   value={formData.executionTime}
-                  onChange={(e) => handleInputChange('executionTime', e.target.value)}
-                  style={{ padding: '0.75rem 1rem' }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('executionTime', e.target.value)}
+                  style={baseInputStyle}
                 />
               </div>
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Authorized Personnel *</label>
+            <div>
+              <label style={labelStyle}>Authorized Personnel *</label>
               <input
                 type="text"
-                className="input-class"
                 value={formData.authorizedPersonnel}
-                onChange={(e) => handleInputChange('authorizedPersonnel', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('authorizedPersonnel', e.target.value)}
                 placeholder="Names of authorized personnel"
-                style={{ padding: '0.75rem 1rem' }}
+                style={baseInputStyle}
               />
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Verification Method</label>
+            <div>
+              <label style={labelStyle}>Verification Method *</label>
               <select
-                className="input-class"
                 value={formData.verificationMethod}
-                onChange={(e) => handleInputChange('verificationMethod', e.target.value)}
-                style={{ padding: '0.75rem 1rem' }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('verificationMethod', e.target.value)}
+                style={baseInputStyle}
               >
                 <option value="">Select verification method</option>
                 <option value="digital-signature">Digital Signature</option>
@@ -459,15 +565,14 @@ const Operation = () => {
               </select>
             </div>
             
-            <div className="form-item">
-              <label className="form-label">Completion Criteria</label>
+            <div>
+              <label style={labelStyle}>Completion Criteria *</label>
               <textarea
-                className="input-class"
                 value={formData.completionCriteria}
-                onChange={(e) => handleInputChange('completionCriteria', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('completionCriteria', e.target.value)}
                 placeholder="Define criteria for successful completion"
                 rows={4}
-                style={{ padding: '0.75rem 1rem', resize: 'vertical' }}
+                style={{ ...baseInputStyle, resize: 'vertical' as const }}
               />
             </div>
           </div>
@@ -478,6 +583,88 @@ const Operation = () => {
     }
   };
 
+  // Success/Error result display
+  if (submitResult) {
+    return (
+      <div style={{ 
+        padding: '2rem',
+        backgroundColor: '#f9fafb',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb',
+          padding: '2rem',
+          textAlign: 'center',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+        }}>
+          {submitResult.success ? (
+            <>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+              <h2 style={{ fontSize: '1.875rem', fontWeight: '600', color: '#059669', marginBottom: '1rem' }}>
+                Smart Contract Created Successfully!
+              </h2>
+              <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+                {submitResult.message}
+              </p>
+              <div style={{ 
+                backgroundColor: '#f0f9ff', 
+                border: '1px solid #0ea5e9', 
+                borderRadius: '0.5rem', 
+                padding: '1rem',
+                marginBottom: '1rem',
+                textAlign: 'left'
+              }}>
+                <h3 style={{ fontSize: '1rem', color: '#0c4a6e', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  Contract Details:
+                </h3>
+                <div style={{ fontSize: '0.875rem', color: '#0c4a6e' }}>
+                  <p><strong>Contract ID:</strong> {submitResult.operationId}</p>
+                  <p><strong>Block Hash:</strong> {submitResult.blockHash}</p>
+                  <p><strong>Gas Used:</strong> {submitResult.gasUsed}</p>
+                  <p><strong>Confirmations:</strong> {submitResult.confirmations}</p>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                Resetting form in a few seconds...
+              </p>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>❌</div>
+              <h2 style={{ fontSize: '1.875rem', fontWeight: '600', color: '#dc2626', marginBottom: '1rem' }}>
+                Creation Failed
+              </h2>
+              <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '2rem' }}>
+                {submitResult.message}
+              </p>
+              <button
+                onClick={() => setSubmitResult(null)}
+                style={{
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  padding: '0.75rem 2rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Try Again
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ 
       padding: '2rem',
@@ -485,21 +672,13 @@ const Operation = () => {
       minHeight: '100vh'
     }}>
       <div style={{
-        maxWidth: '1200px',
+        maxWidth: '1000px',
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
         gap: '2rem'
       }}>
-        {/* Header */}
-        <div className="header-box">
-          <h1 className="header-box-title">Operations Management</h1>
-          <p className="header-box-subtext">
-            Complete the 5-step process to set up your operation
-          </p>
-        </div>
-
-        {/* Progress Timeline */}
+        {/* Header with Timeline */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '0.75rem',
@@ -507,7 +686,12 @@ const Operation = () => {
           padding: '2rem',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: '600', color: '#111827', marginBottom: '2rem', textAlign: 'center' }}>
+            Create a Smart Contract
+          </h1>
+          
+          {/* Progress Timeline */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             {steps.map((step, index) => (
               <div key={step.id} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 <div style={{
@@ -517,21 +701,25 @@ const Operation = () => {
                   flex: 1
                 }}>
                   <div style={{
-                    width: '3rem',
-                    height: '3rem',
+                    width: '2.5rem',
+                    height: '2.5rem',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: step.id <= currentStep ? '#2563eb' : '#e5e7eb',
-                    color: step.id <= currentStep ? 'white' : '#6b7280',
+                    backgroundColor: step.id <= currentStep 
+                      ? (validateStep(step.id) ? '#10b981' : '#6b7280') 
+                      : '#e5e7eb',
+                    color: step.id <= currentStep ? 'white' : '#9ca3af',
                     fontWeight: '600',
-                    fontSize: '1.125rem',
-                    marginBottom: '0.5rem'
+                    fontSize: '0.875rem',
+                    marginBottom: '0.5rem',
+                    border: step.id === currentStep ? '2px solid #2563eb' : 'none'
                   }}>
-                    {step.id < currentStep ? '✓' : step.id}
+                    {step.id < currentStep && validateStep(step.id) ? '✓' : step.id}
                   </div>
-                  <div className="text-12" style={{ 
+                  <div style={{ 
+                    fontSize: '0.75rem',
                     color: step.id === currentStep ? '#2563eb' : '#6b7280',
                     fontWeight: step.id === currentStep ? '600' : '400',
                     textAlign: 'center'
@@ -543,20 +731,14 @@ const Operation = () => {
                   <div style={{
                     height: '2px',
                     flex: 1,
-                    backgroundColor: step.id < currentStep ? '#2563eb' : '#e5e7eb',
+                    backgroundColor: step.id < currentStep ? '#10b981' : '#e5e7eb',
                     margin: '0 1rem',
                     alignSelf: 'flex-start',
-                    marginTop: '1.5rem'
+                    marginTop: '1.25rem'
                   }} />
                 )}
               </div>
             ))}
-          </div>
-          
-          <div className="text-center" style={{ marginTop: '1rem' }}>
-            <div className="text-14" style={{ color: '#6b7280' }}>
-              {steps[currentStep - 1]?.description}
-            </div>
           </div>
         </div>
 
@@ -568,6 +750,9 @@ const Operation = () => {
           padding: '2rem',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', marginBottom: '1.5rem' }}>
+            Step {currentStep}: {steps[currentStep - 1]?.name}
+          </h2>
           {renderStepContent()}
         </div>
 
@@ -585,44 +770,96 @@ const Operation = () => {
           <button
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="view-all-btn"
             style={{
               padding: '0.75rem 1.5rem',
-              opacity: currentStep === 1 ? 0.5 : 1,
-              cursor: currentStep === 1 ? 'not-allowed' : 'pointer'
+              backgroundColor: currentStep === 1 ? '#f9fafb' : '#6b7280',
+              color: currentStep === 1 ? '#9ca3af' : 'white',
+              border: '1px solid #d1d5db',
+              borderRadius: '0.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              cursor: currentStep === 1 ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s'
             }}
           >
-            Previous
+            ← Previous
           </button>
           
-          <div className="text-14" style={{ color: '#6b7280' }}>
-            Step {currentStep} of {steps.length}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Step {currentStep} of {steps.length}
+            </div>
           </div>
           
           {currentStep < 5 ? (
             <button
               onClick={handleNext}
-              className="form-btn"
-              style={{ padding: '0.75rem 1.5rem' }}
+              disabled={!validateStep(currentStep)}
+              style={{ 
+                padding: '0.75rem 1.5rem',
+                backgroundColor: validateStep(currentStep) ? '#2563eb' : '#9ca3af',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: validateStep(currentStep) ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s'
+              }}
             >
-              Next
+              Next Step →
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              className="form-btn"
+              disabled={isSubmitting || !validateStep(5)}
               style={{ 
-                padding: '0.75rem 1.5rem',
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                padding: '0.75rem 2rem',
+                backgroundColor: isSubmitting 
+                  ? '#9ca3af' 
+                  : validateStep(5)
+                  ? '#10b981'
+                  : '#9ca3af',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: (isSubmitting || !validateStep(5)) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
             >
-              Submit Operation
+              {isSubmitting ? (
+                <>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid transparent',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  Creating Contract...
+                </>
+              ) : (
+                validateStep(5) ? 'Create Smart Contract' : 'Complete All Fields'
+              )}
             </button>
           )}
         </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
 
-export default Operation
+export default Operation;

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title: "Colfi",
   description: "Colfi is here to assist you.",
   icons: {
-    icon: '/icons/logo.png'
+    icon: '/icons/logoCanva.png'
   }
 };
 
