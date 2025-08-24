@@ -46,7 +46,7 @@ const Operation = () => {
   const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
   
   // Replace with your EC2 public IP
-const API_BASE_URL = 'http://16.171.199.116:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:3001';
   
   const [formData, setFormData] = useState<FormData>({
     // Step 1: Client Info
