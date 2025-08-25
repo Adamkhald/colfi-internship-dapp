@@ -31,6 +31,24 @@ interface FormData {
   completionCriteria: string;
 }
 
+interface AssetFormData {
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  assetName: string;
+  assetType: string;
+  assetValue: string;
+  assetDescription: string;
+  acquisitionDate: string;
+  assetLocation: string;
+  serialNumber: string;
+  ownershipProof: string;
+  legalCompliance: boolean;
+  accurateInformation: boolean;
+  ownershipRights: boolean;
+  liabilityAcceptance: boolean;
+}
+
 interface SubmitResult {
   success: boolean;
   operationId?: string;
@@ -45,8 +63,12 @@ const Operation = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
   
+  // Asset form states
+  const [isSubmittingAsset, setIsSubmittingAsset] = useState<boolean>(false);
+  const [assetSubmitResult, setAssetSubmitResult] = useState<SubmitResult | null>(null);
+  
   // Replace with your EC2 public IP
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:3001';
+const API_BASE_URL = 'http://16.171.199.116:3001';
   
   const [formData, setFormData] = useState<FormData>({
     // Step 1: Client Info
@@ -86,6 +108,24 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
     completionCriteria: ''
   });
 
+  const [assetFormData, setAssetFormData] = useState<AssetFormData>({
+    ownerName: '',
+    ownerEmail: '',
+    ownerPhone: '',
+    assetName: '',
+    assetType: '',
+    assetValue: '',
+    assetDescription: '',
+    acquisitionDate: '',
+    assetLocation: '',
+    serialNumber: '',
+    ownershipProof: '',
+    legalCompliance: false,
+    accurateInformation: false,
+    ownershipRights: false,
+    liabilityAcceptance: false
+  });
+
   const steps = [
     { id: 1, name: 'Client Information' },
     { id: 2, name: 'Legal Compliance' },
@@ -96,6 +136,13 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleAssetInputChange = (field: keyof AssetFormData, value: string | boolean) => {
+    setAssetFormData(prev => ({
       ...prev,
       [field]: value
     }));
@@ -121,6 +168,15 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
       default:
         return true;
     }
+  };
+
+  const validateAssetForm = (): boolean => {
+    return !!(assetFormData.ownerName && assetFormData.ownerEmail && assetFormData.ownerPhone &&
+             assetFormData.assetName && assetFormData.assetType && assetFormData.assetValue &&
+             assetFormData.assetDescription && assetFormData.acquisitionDate && assetFormData.assetLocation &&
+             assetFormData.serialNumber && assetFormData.ownershipProof &&
+             assetFormData.legalCompliance && assetFormData.accurateInformation &&
+             assetFormData.ownershipRights && assetFormData.liabilityAcceptance);
   };
 
   const handleNext = () => {
@@ -156,6 +212,28 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
     } catch (error) {
       console.error('Blockchain submission error:', error);
       throw new Error(`Failed to submit to blockchain: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const submitAssetToBlockchain = async (assetData: AssetFormData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/submit-operation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(assetData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Asset blockchain submission error:', error);
+      throw new Error(`Failed to submit asset to blockchain: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -200,6 +278,46 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleAssetSubmit = async () => {
+    if (!validateAssetForm()) {
+      return;
+    }
+
+    setIsSubmittingAsset(true);
+    setAssetSubmitResult(null);
+
+    try {
+      const blockchainResult = await submitAssetToBlockchain(assetFormData);
+      
+      setAssetSubmitResult({
+        success: true,
+        operationId: blockchainResult.nodeId || blockchainResult.operationId,
+        blockHash: blockchainResult.blockHash,
+        message: 'Asset node created successfully on blockchain!',
+        gasUsed: blockchainResult.gasUsed,
+        confirmations: blockchainResult.confirmations
+      });
+
+      setTimeout(() => {
+        setAssetFormData({
+          ownerName: '', ownerEmail: '', ownerPhone: '', assetName: '', assetType: '',
+          assetValue: '', assetDescription: '', acquisitionDate: '', assetLocation: '',
+          serialNumber: '', ownershipProof: '', legalCompliance: false,
+          accurateInformation: false, ownershipRights: false, liabilityAcceptance: false
+        });
+        setAssetSubmitResult(null);
+      }, 10000);
+
+    } catch (error) {
+      setAssetSubmitResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
+    } finally {
+      setIsSubmittingAsset(false);
     }
   };
 
@@ -583,7 +701,239 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
     }
   };
 
-  // Success/Error result display
+  const renderAssetForm = () => {
+    const baseInputStyle: React.CSSProperties = {
+      padding: '0.75rem 1rem',
+      width: '100%',
+      border: '1px solid #d1d5db',
+      borderRadius: '0.5rem',
+      fontSize: '1rem',
+      transition: 'border-color 0.2s',
+      outline: 'none'
+    };
+
+    const labelStyle: React.CSSProperties = {
+      display: 'block',
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      color: '#374151',
+      marginBottom: '0.5rem'
+    };
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Owner Information */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div>
+            <label style={labelStyle}>Owner Full Name *</label>
+            <input
+              type="text"
+              value={assetFormData.ownerName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('ownerName', e.target.value)}
+              placeholder="Enter your full name"
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Email Address *</label>
+            <input
+              type="email"
+              value={assetFormData.ownerEmail}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('ownerEmail', e.target.value)}
+              placeholder="owner@example.com"
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Phone Number *</label>
+            <input
+              type="tel"
+              value={assetFormData.ownerPhone}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('ownerPhone', e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              style={baseInputStyle}
+            />
+          </div>
+        </div>
+
+        {/* Asset Information */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div>
+            <label style={labelStyle}>Asset Name *</label>
+            <input
+              type="text"
+              value={assetFormData.assetName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('assetName', e.target.value)}
+              placeholder="Name of the asset"
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Asset Type *</label>
+            <select
+              value={assetFormData.assetType}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAssetInputChange('assetType', e.target.value)}
+              style={baseInputStyle}
+            >
+              <option value="">Select asset type</option>
+              <option value="real-estate">Real Estate</option>
+              <option value="vehicle">Vehicle</option>
+              <option value="artwork">Artwork</option>
+              <option value="jewelry">Jewelry</option>
+              <option value="electronics">Electronics</option>
+              <option value="collectibles">Collectibles</option>
+              <option value="intellectual-property">Intellectual Property</option>
+              <option value="cryptocurrency">Cryptocurrency</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Asset Value (USD) *</label>
+            <input
+              type="text"
+              value={assetFormData.assetValue}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('assetValue', e.target.value)}
+              placeholder="$100,000"
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Acquisition Date *</label>
+            <input
+              type="date"
+              value={assetFormData.acquisitionDate}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('acquisitionDate', e.target.value)}
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Serial/ID Number *</label>
+            <input
+              type="text"
+              value={assetFormData.serialNumber}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('serialNumber', e.target.value)}
+              placeholder="Serial number or unique identifier"
+              style={baseInputStyle}
+            />
+          </div>
+          
+          <div>
+            <label style={labelStyle}>Ownership Proof Type *</label>
+            <select
+              value={assetFormData.ownershipProof}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAssetInputChange('ownershipProof', e.target.value)}
+              style={baseInputStyle}
+            >
+              <option value="">Select proof type</option>
+              <option value="deed">Deed/Title</option>
+              <option value="receipt">Purchase Receipt</option>
+              <option value="certificate">Certificate of Authenticity</option>
+              <option value="registration">Registration Document</option>
+              <option value="invoice">Invoice/Bill of Sale</option>
+              <option value="contract">Contract Agreement</option>
+              <option value="other">Other Legal Document</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Asset Description *</label>
+          <textarea
+            value={assetFormData.assetDescription}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleAssetInputChange('assetDescription', e.target.value)}
+            placeholder="Detailed description of the asset"
+            rows={4}
+            style={{ ...baseInputStyle, resize: 'vertical' as const }}
+          />
+        </div>
+        
+        <div>
+          <label style={labelStyle}>Asset Location *</label>
+          <input
+            type="text"
+            value={assetFormData.assetLocation}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('assetLocation', e.target.value)}
+            placeholder="Current location of the asset"
+            style={baseInputStyle}
+          />
+        </div>
+
+        {/* Legal Declarations */}
+        <div style={{ 
+          backgroundColor: '#fef3c7', 
+          border: '1px solid #f59e0b', 
+          borderRadius: '0.5rem', 
+          padding: '1.5rem' 
+        }}>
+          <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#92400e', marginBottom: '1rem' }}>
+            Legal Declarations
+          </h4>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <input
+                type="checkbox"
+                id="legalCompliance"
+                checked={assetFormData.legalCompliance}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('legalCompliance', e.target.checked)}
+                style={{ width: '1.25rem', height: '1.25rem', marginTop: '0.125rem' }}
+              />
+              <label htmlFor="legalCompliance" style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                I confirm that this asset was acquired through legal means and complies with all applicable laws and regulations *
+              </label>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <input
+                type="checkbox"
+                id="accurateInformation"
+                checked={assetFormData.accurateInformation}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('accurateInformation', e.target.checked)}
+                style={{ width: '1.25rem', height: '1.25rem', marginTop: '0.125rem' }}
+              />
+              <label htmlFor="accurateInformation" style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                I declare that all information provided about this asset is accurate and complete to the best of my knowledge *
+              </label>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <input
+                type="checkbox"
+                id="ownershipRights"
+                checked={assetFormData.ownershipRights}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('ownershipRights', e.target.checked)}
+                style={{ width: '1.25rem', height: '1.25rem', marginTop: '0.125rem' }}
+              />
+              <label htmlFor="ownershipRights" style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                I confirm that I have full legal ownership rights to this asset and there are no outstanding claims, liens, or disputes *
+              </label>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <input
+                type="checkbox"
+                id="liabilityAcceptance"
+                checked={assetFormData.liabilityAcceptance}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAssetInputChange('liabilityAcceptance', e.target.checked)}
+                style={{ width: '1.25rem', height: '1.25rem', marginTop: '0.125rem' }}
+              />
+              <label htmlFor="liabilityAcceptance" style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                I accept full responsibility and liability for the accuracy of this declaration and understand that false information may result in legal consequences *
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Success/Error result display for contract
   if (submitResult) {
     return (
       <div style={{ 
@@ -848,6 +1198,142 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://16.171.199.116:300
                 validateStep(5) ? 'Create Smart Contract' : 'Complete All Fields'
               )}
             </button>
+          )}
+        </div>
+
+        {/* Asset Declaration Section */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          border: '1px solid #e5e7eb',
+          padding: '2rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          marginTop: '3rem'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: '600', color: '#111827', marginBottom: '0.5rem' }}>
+              Asset Declaration
+            </h1>
+            <p style={{ fontSize: '1rem', color: '#6b7280' }}>
+              Declare your asset ownership and create a blockchain node
+            </p>
+          </div>
+
+          {assetSubmitResult ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '2rem'
+            }}>
+              {assetSubmitResult.success ? (
+                <>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏛️</div>
+                  <h2 style={{ fontSize: '1.875rem', fontWeight: '600', color: '#059669', marginBottom: '1rem' }}>
+                    Asset Node Created Successfully!
+                  </h2>
+                  <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+                    {assetSubmitResult.message}
+                  </p>
+                  <div style={{ 
+                    backgroundColor: '#ecfdf5', 
+                    border: '1px solid #10b981', 
+                    borderRadius: '0.5rem', 
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    textAlign: 'left'
+                  }}>
+                    <h3 style={{ fontSize: '1rem', color: '#065f46', fontWeight: '600', marginBottom: '0.5rem' }}>
+                      Node Details:
+                    </h3>
+                    <div style={{ fontSize: '0.875rem', color: '#065f46' }}>
+                      <p><strong>Node ID:</strong> {assetSubmitResult.operationId}</p>
+                      <p><strong>Block Hash:</strong> {assetSubmitResult.blockHash}</p>
+                      <p><strong>Gas Used:</strong> {assetSubmitResult.gasUsed}</p>
+                      <p><strong>Confirmations:</strong> {assetSubmitResult.confirmations}</p>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                    Form will reset automatically...
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>❌</div>
+                  <h2 style={{ fontSize: '1.875rem', fontWeight: '600', color: '#dc2626', marginBottom: '1rem' }}>
+                    Asset Declaration Failed
+                  </h2>
+                  <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '2rem' }}>
+                    {assetSubmitResult.message}
+                  </p>
+                  <button
+                    onClick={() => setAssetSubmitResult(null)}
+                    style={{
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      padding: '0.75rem 2rem',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Try Again
+                  </button>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              {renderAssetForm()}
+              
+              {/* Asset Submit Button */}
+              <div style={{
+                marginTop: '2rem',
+                textAlign: 'center'
+              }}>
+                <button
+                  onClick={handleAssetSubmit}
+                  disabled={isSubmittingAsset || !validateAssetForm()}
+                  style={{ 
+                    padding: '1rem 2rem',
+                    backgroundColor: isSubmittingAsset 
+                      ? '#9ca3af' 
+                      : validateAssetForm()
+                      ? '#7c3aed'
+                      : '#9ca3af',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    cursor: (isSubmittingAsset || !validateAssetForm()) ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    margin: '0 auto'
+                  }}
+                >
+                  {isSubmittingAsset ? (
+                    <>
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid transparent',
+                        borderTop: '2px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></div>
+                      Creating Asset Node...
+                    </>
+                  ) : (
+                    <>
+                       {validateAssetForm() ? 'Declare Asset & Create Node' : 'Complete All Fields'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
