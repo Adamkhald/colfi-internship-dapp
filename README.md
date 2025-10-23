@@ -21,7 +21,7 @@ This Web App is a Next.js-based decentralized application (DApp) that provides f
 
 - **Frontend**: Next.js, React
 - **Styling**: Tailwind CSS
-- **Deployment**: AWS Amplify
+- **Deployment**: AWS Amplify, AWS EC2, Docker, Hyper Ledger Fabric.
 - **Version Control**: Git/GitHub
 
 ## Getting Started
@@ -29,7 +29,7 @@ This Web App is a Next.js-based decentralized application (DApp) that provides f
 ### Prerequisites
 
 - Node.js (v14 or higher)
-- npm or yarn
+- npm 
 - Git
 
 ### Installation
@@ -89,7 +89,7 @@ This application is configured for deployment on AWS Amplify with automatic depl
 
 ## License
 
-This project is part of an internship program and is for educational purposes.
+This project is part of an internship program .
 
 ## Contact
 
