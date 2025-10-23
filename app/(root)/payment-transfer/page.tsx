@@ -68,7 +68,7 @@ const Operation = () => {
   const [assetSubmitResult, setAssetSubmitResult] = useState<SubmitResult | null>(null);
   
   // Replace with your EC2 public IP
-const API_BASE_URL = 'http://16.171.199.116:3001';
+const API_BASE_URL = 'change with your own link';
   
   const [formData, setFormData] = useState<FormData>({
     // Step 1: Client Info
