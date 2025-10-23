@@ -5,7 +5,9 @@ A decentralized web application for managing financial assets, including collate
 ## Overview
 
 This Web App is a Next.js-based decentralized application (DApp) that provides financial institutions with a comprehensive platform to manage their assets, particularly focusing on collateral management and bond tracking. The application streamlines asset management processes through an intuitive web interface.
-
+## Preview
+![ColFi Dashboard](./preview.png)
+*Main dashboard interface for asset and collateral management*
 ## Features
 
 - **Asset Management**: Track and manage various financial assets
